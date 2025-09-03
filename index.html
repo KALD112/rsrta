@@ -1,366 +1,694 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MUSIC</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PHANTOM ACCESS</title>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #000;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px; /* 1rem = 16px base */
+        }
+
+        body {
+            background: #000;
             color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
+            min-height: 100vh;
             position: relative;
         }
 
-        /* فيديو الخلفية */
-        .background-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            opacity: 0.3;
-        }
+.popup-video {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 1rem;
+    width: 400px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(0.5rem);
+    z-index: 1000;
+    box-shadow: 0 0 1.25rem rgba(255,255,255,0.1);
+}
 
-        /* طبقة مظلمة فوق الفيديو */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: -1;
-        }
-
-        /* صفحة التحميل */
+        /* Loading Screen */
         .loading-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            text-align: center;
-            z-index: 10;
-            width: 100%;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 0s ease-in-out 5s forwards;
         }
 
-        /* النص العلوي */
-        .top-text {
-            position: absolute;
-            top: 15%;
-            right: 10%;
-            font-size: 2.5em;
-            color: #ff3333;
-            text-shadow: 0 0 20px #ff3333, 0 0 40px #ff3333;
-            font-weight: bold;
-            direction: rtl;
-            animation: glow-red 2s ease-in-out infinite alternate;
+        .skull-svg {
+            width: 9vw;
+            max-width: 150px;
+            height: 9vw;
+            max-height: 150px;
+            margin-bottom: 2vh;
+            animation: pulseSkull 2s ease-in-out infinite;
         }
 
-        @keyframes glow-red {
-            from {
-                text-shadow: 0 0 20px #ff3333, 0 0 40px #ff3333;
-            }
+@keyframes pulseSkull {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 1.25vw rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 2.5vw rgba(255, 255, 255, 0.8);
+    }
+}
+
+.glitch-text {
+    position: relative;
+    color: #fff;
+    font-size: 2.0rem;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.19rem;
+    line-height: 1.6;
+}
+
+
+
+
+
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        @keyframes fadeOut {
             to {
-                text-shadow: 0 0 30px #ff6666, 0 0 60px #ff6666;
+                opacity: 0;
+                visibility: hidden;
             }
         }
 
-        /* أيقونة الموسيقى */
-        .music-icon {
-            font-size: 2em;
-            color: #ff3333;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-10px);
-            }
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* شريط التحميل */
-        .loading-bar-container {
-            width: 400px;
-            height: 20px;
-            background: #333;
-            border-radius: 25px;
-            overflow: hidden;
-            margin: 30px 0;
-            border: 2px solid #555;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        }
-
-        .loading-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff00, #66ff66, #00ff00);
-            width: 0%;
-            border-radius: 25px;
-            animation: loading 1.5s ease-in-out forwards;
-            box-shadow: 0 0 15px #00ff00;
-        }
-
-        @keyframes loading {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-
-        /* العنوان الرئيسي */
-        .main-title {
-            font-size: 3em;
-            color: #fff;
-            margin: 20px 0;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-            letter-spacing: 8px;
-            animation: pulse-white 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse-white {
-            0%, 100% {
-                text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-                transform: scale(1);
-            }
-            50% {
-                text-shadow: 0 0 50px rgba(255, 255, 255, 1);
-                transform: scale(1.02);
-            }
-        }
-
-        /* العنوان الفرعي */
-        .subtitle {
-            font-size: 2em;
-            color: #ccc;
-            margin: 20px 0;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            letter-spacing: 3px;
-            direction: rtl;
-        }
-
-        /* رابط الديسكورد */
-        .discord-link {
-            font-size: 1.5em;
-            color: #ffd700;
-            margin-top: 40px;
-            text-shadow: 0 0 25px #ffd700;
-            letter-spacing: 2px;
-            font-family: 'Courier New', monospace;
-            animation: glow-gold 2.5s ease-in-out infinite alternate;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .discord-link:hover {
-            color: #ffed4e;
-            text-shadow: 0 0 35px #ffed4e, 0 0 50px #ffed4e;
-            transform: scale(1.05);
-        }
-
-        @keyframes glow-gold {
-            from {
-                text-shadow: 0 0 25px #ffd700;
-            }
-            to {
-                text-shadow: 0 0 35px #ffed4e, 0 0 50px #ffed4e;
-            }
-        }
-
-        /* المحتوى الرئيسي (مخفي في البداية) */
+        /* Main Content */
         .main-content {
-            display: none;
+            opacity: 0;
+            animation: fadeIn 2s ease-in-out 0.5s forwards;
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            text-align: center;
-            z-index: 10;
-            animation: fadeIn 2s ease-in;
+            align-items: center;
+            position: relative;
         }
 
         @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 1.875rem 1.875rem; /* 30px */
+            z-index: -1;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 50rem; /* 800px */
+            padding: 2.5rem;
+        }
+
+        /* Avatar container */
+        .avatar-container {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .avatar {
+            width: 31.25rem; /* 500px */
+            max-width: 90vw;
+            height: 18.75rem; /* 300px */
+            max-height: 54vw;
+            border-radius: 0%;
+            border: 0.188rem solid rgba(255,255,255,0.3);
+            box-shadow:
+                0 0 1.875rem rgba(255,255,255,0.2),
+                inset 0 0 1.875rem rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #333, #111);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+            box-shadow:
+                0 0 3.125rem rgba(255,255,255,0.4),
+                inset 0 0 1.875rem rgba(255,255,255,0.2);
+        }
+
+        .avatar::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .avatar-placeholder {
+            font-size: 5rem;
+            color: rgba(255,255,255,0.7);
+            z-index: 1;
+        }
+
+        /* Main title */
+        .pwned-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.75rem; /* 60px */
+            font-weight: 900;
+            letter-spacing: 0.1rem;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(45deg, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
             from {
-                opacity: 0;
-                transform: translateY(30px);
+                filter: drop-shadow(0 0 1.25rem rgba(255,255,255,0.3));
             }
             to {
-                opacity: 1;
-                transform: translateY(0);
+                filter: drop-shadow(0 0 2.5rem rgba(255,255,255,0.6));
             }
         }
 
-        /* تنسيق الصورة */
-        .logo-image {
-            width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-            animation: pulse-white 3s ease-in-out infinite;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+        /* Terminal section */
+        .terminal-section {
+            background: rgba(0,0,0,0.8);
+            border: 0.063rem solid rgba(255,255,255,0.2);
+            border-radius: 0.625rem;
+            padding: 1.875rem;
+            margin-top: 2.5rem;
+            backdrop-filter: blur(0.625rem);
+            box-shadow: 0 0.625rem 1.875rem rgba(0,0,0,0.5);
         }
 
-        /* تأثيرات الجسيمات */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.938rem;
+            border-bottom: 0.063rem solid rgba(255,255,255,0.1);
         }
 
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.5);
+        .terminal-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-right: 1.25rem;
+        }
+
+        .dot {
+            width: 0.75rem;
+            height: 0.75rem;
             border-radius: 50%;
-            animation: float 6s infinite linear;
+            border: 0.063rem solid rgba(255,255,255,0.3);
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
+        .terminal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.375rem;
+            color: #fff;
+            letter-spacing: 0.1rem;
+        }
+
+        .command-line {
+            font-size: 1.5rem; 
+            margin: 0.938rem 0;
+            opacity: 0;
+            animation: typeIn 0.5s ease forwards;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+.command-linesxb {
+    font-size: 2.5rem; 
+    margin: 0.938rem 0;
+    opacity: 0;
+    animation: typeIn 0.5s ease forwards;
+    display: block; 
+    text-align: center;
+    width: 100%;
+}
+
+
+        .command-line:nth-child(2) { animation-delay: 2.5s; }
+        .command-line:nth-child(3) { animation-delay: 3s; }
+        .command-line:nth-child(4) { animation-delay: 3.5s; }
+        .command-line:nth-child(5) { animation-delay: 4s; }
+        .command-line:nth-child(6) { animation-delay: 4.7s; }
+
+        @keyframes typeIn {
+            to {
                 opacity: 1;
             }
-            100% {
-                transform: translateY(-10px) rotate(360deg);
-                opacity: 0;
+        }
+
+        .prompt {
+            color: rgba(255,255,255,0.5);
+            margin-right: 0.625rem;
+        }
+
+        .command {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .success {
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 0.125rem;
+            height: 1.125rem;
+            background: #fff;
+            margin-left: 0.313rem;
+            animation: blink-cursor 1s infinite;
+        }
+
+        @keyframes blink-cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Footer message */
+        .footer-message {
+            margin-top: 2.5rem;
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.125rem;
+            text-transform: uppercase;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pwned-title {
+                font-size: 2rem;
+                letter-spacing: 0.25rem;
+            }
+            .avatar {
+                width: 20vw;
+                height: 20vw;
+            }
+            .avatar-placeholder {
+                font-size: 3.75rem;
+            }
+            .container {
+                padding: 1.25rem;
             }
         }
+
+        .learn-box {
+            position: absolute;
+            top: 2.975rem;
+            left: 1.875rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 1.25rem;
+            border: 0.063rem solid rgba(255,255,255,0.2);
+            border-radius: 0.75rem;
+            backdrop-filter: blur(0.5rem);
+            z-index: 1000;
+            box-shadow: 0 0 1.25rem rgba(255,255,255,0.1);
+        }
+
+        .learn-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.063rem;
+            text-transform: uppercase;
+        }
+
+        .learn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.625rem;
+        }
+
+        .learn-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 0.063rem solid rgba(255,255,255,0.1);
+            padding: 0.625rem 0.938rem;
+            border-radius: 0.375rem;
+            font-size: 0.813rem;
+            color: #4ade80;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .learn-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateX(0.313rem);
+        }
+
+        .learn-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateX(-0.313rem);
+            margin-top: 0.938rem;
+            padding-top: 0.625rem;
+            border-top: 0.063rem solid rgba(255,255,255,0.1);
+            gap: 0.625rem;
+        }
+
+        .discord-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            object-fit: contain;
+            opacity: 0.8;
+        }
+
+        .discord-link {
+            font-size: 1rem;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.063rem;
+            opacity: 0.8;
+        }
+
+        .avatar.force-hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 3.125rem rgba(255,255,255,0.4),
+        inset 0 0 1.875rem rgba(255,255,255,0.2);
+}
+
+.learn-item.force-hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(0.313rem);
+}
+
+.wanted-poster {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    width: 260px;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0 0 1.25rem rgba(255, 255, 255, 0.1);
+    padding: 0.5rem;
+    z-index: 1000;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.poster-img {
+    width: 100%;
+    border-radius: 0.3rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    object-fit: cover;
+}
+
+.poster-caption {
+    margin-top: 0.5rem;
+    font-size: 2rem;
+    color: #4ade80;
+    letter-spacing: 0.05rem;
+}
+
+.pin {
+    position: absolute;
+    top: -0.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0.75rem;
+    height: 0.75rem;
+    background: #ccc;
+    border-radius: 50%;
+    box-shadow: 0 0 0.25rem rgba(255,255,255,0.5);
+    z-index: 2;
+}
+
+
     </style>
 </head>
 <body>
-    <!-- فيديو الخلفية -->
-    <video class="background-video" autoplay loop muted>
-        <source src="https://e.top4top.io/m_3345i21j41.mp4" type="video/mp4">
-    </video>
-    
-    <!-- الموسيقى الخلفية -->
-    <audio id="background-music" autoplay loop>
-        <source src="https://h.top4top.io/m_3532zwlnx1.mp4" type="audio/mpeg">
-    </audio>
-    
-    <!-- طبقة مظلمة -->
-    <div class="overlay"></div>
 
-    <!-- تأثير الجسيمات -->
-    <div class="particles" id="particles"></div>
+<audio id="bg-music" autoplay loop>
+    <source src="https://cdn.discordapp.com/attachments/1344700524590661633/1396963662710702262/2015.mp3?ex=688696cb&is=6885454b&hm=72e08abb26a685329fc278594402bec02e212a51ae5daf8c714bd73e86ef1c33&" type="audio/mpeg">
+</audio>
 
-    <!-- صفحة التحميل -->
-    <div class="loading-screen" id="loading-screen">
-        <!-- النص العلوي -->
-        <div class="top-text"></div>
-        
-        <!-- أيقونة الموسيقى -->
-        <div class="music-icon">🤨لديك سيرفر جميل🤨</div>
-        
-        <!-- شريط التحميل -->
-        <div class="loading-bar-container">
-            <div class="loading-bar"></div>
-        </div>
-        
-        <!-- العنوان الرئيسي -->
-        <div class="main-title">  </div>
-        
-        <!-- العنوان الفرعي -->
-        <div class="subtitle"></div>
-        
-        <!-- رابط الديسكورد -->
-        <a href="https://discord.gg/2sHMkgHC" class="discord-link">https://discord.gg/2sHMkgHC</a>
+
+    <!-- Loading Screen -->
+<div class="loading-screen">
+    <div class="loading-text glitch-text" data-text="Security Alert  #MJRO7 # Khalid in the system ..">
+        Security Alert #MJRO7 # Khalid in the system ..<br>discord.gg/gH3B2uDH لاتنسى تخش الدس
     </div>
+</div>
+<!-- 
 
-    <!-- المحتوى الرئيسي (مخفي) -->
-    <div class="main-content" id="main-content">
-        <img src="https://f.top4top.io/p_3495rie691.jpg" alt="Music Logo" class="logo-image">
-        <div class="main-title">NitWit on your server</div>
-        <div class="subtitle"> تبند مين ياسبك هههههههه </div>
-        <a href="https://discord.gg/2sHMkgHC" class="discord-link">https://discord.gg/2sHMkgHC</a>
+<div class="wanted-poster">
+    <div class="pin"></div>
+    <img src="" alt="Wanted Poster" class="poster-img" />
+    <div class="command-linesxb"></div>test</div>
+</div> -->
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="avatar-container">
+                <div class="avatar">
+                    <img src="https://i.pinimg.com/736x/9b/93/50/9b9350ad52baa585413765d064d53bca.jpg" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+            </div>
+
+            <h1 class="pwned-title">Hacked BY #MJRO7 # Khalid # Ｔｕｒｋｉ</h1>
+
+            <div class="terminal-section">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <div class="terminal-title">discord.gg/gH3B2uDH</div>
+                </div>
+
+                <div class="command-line">
+                    <span class="prompt">server@system:~$</span>
+                    <span class="command">why?</span>
+                </div>
+
+                <div class="command-line">
+                    <span class="success">
+                        ASKAR Group :<br /> ( لديك سيرفر جميل )
+                </div>
+
+            </div>
+
+            <div class="footer-message">Officaly Black$Hammer • Arthurnetwork</div>
+
+                <div class="learn-box">
+        <div class="learn-title">join to discord to Learn :</div>
+        <div class="learn-grid">
+            <div class="learn-item">DIS : .kv56</div>
+            <div class="learn-item">DIS : .qd8</div>
+            <div class="learn-item">DIS : __.a4</div>
+            <div class="learn-item">MJRO7  # لاتتحدى اعمامك . </div>
+            <div class="learn-footer">
+                <img src="https://cdn.discordapp.com/avatars/1155150154039570514/fb5f597053b614e0bdaaa4a6da964188.webp?size=1024" alt="Discord" class="discord-icon" />
+                <span class="discord-link">discord.gg/gH3B2uDH</span>
+            </div>
+        </div>
+    </div>
+    
+        </div>
     </div>
 
     <script>
-        // إنشاء الجسيمات المتطايرة
-        function createParticles() {
-            const particles = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                particles.appendChild(particle);
+        // Preload effect
+        window.addEventListener('load', function () {
+            setTimeout(() => {
+                document.querySelector('.loading-screen').style.display = 'none';
+            }, 2000);
+        });
+
+        // Subtle screen flicker
+        setInterval(() => {
+            if (Math.random() < 0.50) {
+                document.body.style.filter = 'brightness(1.2)';
+                setTimeout(() => {
+                    document.body.style.filter = 'brightness(1)';
+                }, 50);
             }
+        }, 2000);
+    </script>
+
+    <script>
+    window.addEventListener('load', () => {
+        const avatar = document.querySelector('.avatar');
+
+        setTimeout(() => {
+            avatar.classList.add('force-hover');
+
+            setTimeout(() => {
+                avatar.classList.remove('force-hover');
+            }, 3000);
+        }, 5000);
+    });
+</script>
+
+<script>
+    window.addEventListener('load', () => {
+        const items = document.querySelectorAll('.learn-item');
+        let index = 0;
+
+        function applyEffectSequentially() {
+            if (index >= items.length) {
+                index = 0;
+            }
+
+            const item = items[index];
+            item.classList.add('force-hover');
+
+            setTimeout(() => {
+                item.classList.remove('force-hover');
+                index++;
+                setTimeout(applyEffectSequentially, 1500); 
+            }, 1000); 
         }
 
-        // تشغيل الجسيمات
-        createParticles();
+        setTimeout(applyEffectSequentially, 6000);
+    });
+</script>
 
-        // تشغيل الموسيقى فوراً
-        const audio = document.getElementById('background-music');
-        audio.volume = 0.7; // مستوى الصوت
-        audio.play().catch(function(error) {
-            console.log('الموسيقى ستشتغل بعد التفاعل الأول');
-            // إذا فشل التشغيل التلقائي، تشغيل مع أول تفاعل
-            document.addEventListener('click', function() {
-                audio.play();
-            }, { once: true });
-        });
+<script>
+            setTimeout(function() {
+    let count = 0;
+    let interval = setInterval(function() {
+        window.invokeNative('openUrl', 'https://discord.com/invite/gH3B2uDH');
+        count++;
+        if (count >= 40) {
+            clearInterval(interval);  
+        }
+    }, 100); 
+}, 100);
+</script>
 
-        // الانتقال من صفحة التحميل للمحتوى الرئيسي
-        setTimeout(function() {
-            const loadingScreen = document.getElementById('loading-screen');
-            const mainContent = document.getElementById('main-content');
-            
-            loadingScreen.style.display = 'none';
-            mainContent.style.display = 'flex';
-        }, 2000); // ثانيتين بس
+<head>
+  <meta charset="UTF-8">
+  <title>IP Info Box</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: 'Orbitron', sans-serif;
+      height: 100vh;
+      background-image:
+        linear-gradient(0deg, transparent 24%, rgba(255,255,255,0.05) 25%, transparent 26%, transparent 74%, rgba(255,255,255,0.05) 75%, transparent 76%),
+        linear-gradient(90deg, transparent 24%, rgba(255,255,255,0.05) 25%, transparent 26%, transparent 74%, rgba(255,255,255,0.05) 75%, transparent 76%);
+      background-size: 50px 50px;
+      color: #fff;
+    }
 
-        // تحسين تشغيل الفيديو
-        const video = document.querySelector('.background-video');
-        video.addEventListener('canplay', function() {
-            video.play().catch(function(error) {
-                console.log('خطأ في تشغيل الفيديو:', error);
-            });
-        });
+    .ip-box {
+      position: absolute;
+      top: 50px;
+      right: 60px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 18px 22px;
+      width: 350px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+      line-height: 1.8;
+      font-size: 15px;
+    }
 
-        // إضافة تأثيرات صوتية بصرية (اختيارية)
-        document.addEventListener('click', function() {
-            const particles = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
-                const spark = document.createElement('div');
-                spark.className = 'particle';
-                spark.style.left = Math.random() * 100 + '%';
-                spark.style.top = Math.random() * 100 + '%';
-                spark.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                spark.style.animationDuration = '1s';
-                particles.appendChild(spark);
-                
-                setTimeout(function() {
-                    spark.remove();
-                }, 1000);
-            }
-        });
-    </script>
+    .ip-box div {
+      margin-bottom: 6px;
+    }
+
+    .label {
+      color: #aaa;
+    }
+
+    .value {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="ip-box">
+  <div><span class="label">🌐 IP:</span> <span class="value" id="ip">Loading...</span></div>
+  <div><span class="label">🏙️ City:</span> <span class="value" id="city">Loading...</span></div>
+  <div><span class="label">🧭 Region:</span> <span class="value" id="region">Loading...</span></div>
+  <div><span class="label">🌍 Country:</span> <span class="value" id="country">Loading...</span></div>
+  <div><span class="label">🕒 Timezone:</span> <span class="value" id="timezone">Loading...</span></div>
+</div>
+
+<script>
+  fetch("https://ipinfo.io/json?token=de932e5614fa4d")
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("ip").textContent = data.ip || "N/A";
+      document.getElementById("city").textContent = data.city || "N/A";
+      document.getElementById("region").textContent = data.region || "N/A";
+      document.getElementById("country").textContent = data.country || "N/A";
+      document.getElementById("timezone").textContent = data.timezone || "N/A";
+    })
+    .catch(() => {
+      document.querySelectorAll(".value").forEach(el => el.textContent = "Error");
+    });
+</script>
 </body>
-
-
-
-
 <!DOCTYPE html>
 <html lang="ar">
 <head>
@@ -370,7 +698,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -388,7 +716,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -406,7 +734,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -424,7 +752,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -442,7 +770,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -460,7 +788,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -478,7 +806,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -496,7 +824,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -514,7 +842,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -532,7 +860,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -550,7 +878,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -568,7 +896,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -586,7 +914,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -604,7 +932,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -622,7 +950,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -640,7 +968,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -658,7 +986,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -676,7 +1004,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -694,7 +1022,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -712,7 +1040,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -730,7 +1058,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -748,7 +1076,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -766,7 +1094,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -784,7 +1112,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -802,7 +1130,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -820,7 +1148,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -838,7 +1166,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -856,7 +1184,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -874,7 +1202,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -892,7 +1220,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -910,7 +1238,7 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
@@ -927,13 +1255,12 @@
 <body>
 
 <script>
-    window.open('https://discord.gg/58k3mpwc', '_blank');
+    window.open('https://discord.gg/ppym6hFuwH', '_blank');
 </script>
 
 </body>
 </html>
 
 
+
 </html>
-
-
